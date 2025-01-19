@@ -3,7 +3,8 @@
  
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
- 
+#include "sensor_msgs/msg/laser_scan.hpp"
+
 #include "costmap_core.hpp"
  
 class CostmapNode : public rclcpp::Node {
@@ -12,6 +13,7 @@ class CostmapNode : public rclcpp::Node {
     
     // Place callback function here
     void publishMessage();
+    void laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan);
  
   private:
     robot::CostmapCore costmap_;
