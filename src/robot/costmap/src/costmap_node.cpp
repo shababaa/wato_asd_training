@@ -1,20 +1,25 @@
 #include <chrono>
 #include <memory>
- 
+#include <string>
 #include "costmap_node.hpp"
- 
+const int GRID = 100;
+
 CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->get_logger())) {
   // Subscribe to /lidar
-  auto lidar_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>("/lidar", 10, laserCallback);
+  auto lidar_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+    "/lidar", 10, std::bind(&CostmapNode::laserCallback, this, std::placeholders::_1));
   
   // Publish to /costmap
-  // string_pub_ = this->create_publisher<std_msgs::msg::String>("/costmap", 10);
+  string_pub_ = this->create_publisher<std_msgs::msg::String>("/costmap", 10);
+
+  sub_grid_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "/odom/filtered", 10, std::bind(&CostmapNode::odomCallback, this, std::placeholders::_1));
+  pub_grid_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("/costmap", 10);
   // timer_ = this->create_wall_timer(std::chrono::milliseconds(500), std::bind(&CostmapNode::publishMessage, this));
 }
 
 void CostmapNode::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan) {
-  // Step 0: Print msg
-  RCLCPP_INFO(this->get_logger(), "I heard: [%s]", scan->header.frame_id.c_str());
+  RCLCPP_INFO(this->get_logger(), "Received a message from /lidar");
   
   // Step 1: Initialize costmap
   // initializeCostmap();
